@@ -20,8 +20,9 @@ import java_cup.runtime.Symbol;
 BLANCOS=[ \s\t\r\n\f]+
 S=[ \!\"\#\$\%\&\'\(\)\*\+\,\-\.\/\:\;\<\=\>\?\@\[\]\^\_\{\|\}]
 SE=("\\""n" | "\\""\'" | "\\""\"" )
+SS="!"|"\""|"#"|"$"|"%"|"&"|"\'"|"("|")"|"*"|"+"|","|"-"|"."|"/"|":"|";"|"<"|"="|">"|"?"|"@"|"["|"]"|"^"|"_"|"{"|"|"|"}";
 L=[a-zA-Z]
-D=[0-9]
+D=[0-9]*
 DD=[0-9]+("."[ |0-9]+)?
 
 
@@ -39,7 +40,7 @@ FLECHA=">"
 //conjuntos
 RESERVADA="CONJ"
 DOS_PUNTOS=":"
-CONJUNTO=(({L}"~"{L})|({D}"~"{D})|({S}"~"{S})|({L}+(","{L})+)*|({D}+(","{D})+)*)
+CONJUNTO=(({L}"~"{L})|({D}"~"{D})|({S}"~"{S})|({L}+(","{L})+)*|({D}+(","{D})+)*|({S}(","{S})+)*)
 DELIMITADOR="%%"
 
 
@@ -51,7 +52,7 @@ ESP_CONJER={SE}
 
 NOMBRES={L}({L}|"_"|{D})*
 ID_CONJER="{" [a-zA-Z0-9_]+ "}"
-
+LEXEMA=[\"]({L}|{SS}|{D})*[\"]
 
 
 %{
@@ -80,6 +81,7 @@ ID_CONJER="{" [a-zA-Z0-9_]+ "}"
 {CONJUNTO} {return new Symbol(sym.CONJUNTO,yyline,yychar, yytext());}
 {DELIMITADOR} {return new Symbol(sym.DELIMITADOR,yyline,yychar, yytext());}
 {NOMBRES} {return new Symbol(sym.NOMBRES,yyline,yychar, yytext());}
+{LEXEMA} {return new Symbol(sym.LEXEMA,yyline,yychar, yytext());}
 {ID_CONJER} {return new Symbol(sym.ID_CONJER,yyline,yychar, yytext());}
 
 
