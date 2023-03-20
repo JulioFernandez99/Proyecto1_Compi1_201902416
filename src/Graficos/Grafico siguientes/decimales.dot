@@ -1,7 +1,0 @@
-digraph {
-  node [ shape=none fontname=Helvetica ]
- n1 [ label = <
-<table>
-<tr><td colspan="2" bgcolor="cadetblue">Hojas</td><td colspan="1" bgcolor="crimson">Siguientes</td></tr>
-<tr><td bgcolor="darkgoldenrod1">1</td><td bgcolor="darkseagreen4">digito</td><td bgcolor="cyan3">1, 2</td></tr><tr><td bgcolor="darkgoldenrod1">2</td><td bgcolor="darkseagreen4">"."</td><td bgcolor="cyan3">3</td></tr><tr><td bgcolor="darkgoldenrod1">3</td><td bgcolor="darkseagreen4">digito</td><td bgcolor="cyan3">3, 4</td></tr><tr><td bgcolor="darkgoldenrod1">4</td><td bgcolor="darkseagreen4">#</td><td bgcolor="cyan3"></td></tr> </table>>]
-}
