@@ -6,6 +6,7 @@
 
 package analizadores;
 
+import GUI.FrmPrincipal;
 import java_cup.runtime.*;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -313,7 +314,7 @@ public static int contid=1;
     	codigoAFD="";
     	codigoNodos="";
     	
-    	
+    	json="";
 		recorrido(Raiz);
 		//System.out.println(siguientes);
 		//System.out.println(hojas);
@@ -418,7 +419,8 @@ public static int contid=1;
 		generarTrassiciones();
 		grafEstados();
 		genenerarExpReg(Raiz);
-		expReg=expReg.replace("#", "").replace("\"", "").replace(" ","\" \"" ).replace(".", "").replace("°", ".");
+		
+		expReg=expReg.replace("#", "").replace("\"", "").replace(" ","\" \"" ).replace(",", "");
 		
 		String conj[]=conjuntos.keySet().toString().replace("[", "").replace("]", "").replace(" ", "").split(",");
 		for(int i=0;i<conj.length;i++) {
@@ -853,7 +855,7 @@ public static int contid=1;
 			genenerarExpReg(r.getHizq());
 			
 			if(r.getValor().equals("\".\"")) {
-				expReg+="°";
+				expReg+="Â°";
 			}
 			expReg+=r.getValor();
 			
@@ -883,7 +885,7 @@ public static int contid=1;
 			json+="{\n";
 			json+="\"Valor\": \""+lex+"\",\n";
 			json+="\"ExpresionRegular\": \""+nom+"\",\n";
-			String patron=exps.get(nom).toString().replace("\" \"", "\\s");
+			String patron=exps.get(nom).toString().replace("\" \"", "\\s").replace(".","").replace("Â°", ".");
 			lex=lex.replace("\\", "");
 			System.out.println("Patron: "+patron+" Cadena a evaluar: "+lex);
 			
@@ -910,6 +912,7 @@ public static int contid=1;
 		cadena+=pop(json);
 		cadena+="]\n";
 		System.out.println(cadena);
+		FrmPrincipal.txtreporte.setText(cadena);
 		FileWriter fichero = null;
         PrintWriter pw = null;
         try {

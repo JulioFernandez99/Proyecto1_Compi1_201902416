@@ -1,5 +1,6 @@
 package analizadores;
 import java_cup.runtime.Symbol; 
+import GUI.FrmPrincipal;
 
 %% 
 %class Lexico
@@ -15,6 +16,15 @@ import java_cup.runtime.Symbol;
     yychar = 1; 
 %init} 
 
+%{
+	private Symbol symbol(int type,Object value){
+		return new Symbol(type,yyline,yycolumn,value);
+	}
+	
+	private Symbol symbol(int type){
+		return new Symbol(type,yyline,yycolumn);
+	}
+%}
 
 
 BLANCOS=[ \s\t\r\n\f]+
@@ -24,6 +34,8 @@ SE=("\\""n" | "\\""\'" | "\\""\"" )
 L=[a-zA-Z]
 D=[0-9]*
 DD=[0-9]+("."[ |0-9]+)?
+
+
 
 
 LLAVE_A="{"
@@ -58,9 +70,7 @@ ID_CONJER="{" [a-zA-Z0-9_]+ "}"
 LEXEMA=\"(([^\"\\]|\\.)*)\"
 
 
-%{
 
-%}
 
 %%
 
@@ -91,8 +101,9 @@ LEXEMA=\"(([^\"\\]|\\.)*)\"
 {LLAVE_C} {return new Symbol(sym.LLAVE_C,yyline,yychar, yytext());}
 
 . {
-    System.out.println("Este es un error lexico: "+yytext()+
-    ", en la linea: "+yyline+", en la columna: "+yychar);
+	
+	FrmPrincipal.agregarTable(yytext(),String.valueOf(yyline),String.valueOf(yychar));
+	
 }
 
 

@@ -784,6 +784,15 @@ public static int contid=1;
 	
 
 
+	private Symbol s;
+	public void syntax_error(Symbol s){
+		this.s=s;
+	}
+	
+	public Symbol getS(){
+		return this.s;
+	}
+
 :}
 
 terminal String OR,MAS,CONCA,PUNTO_COMA,DOS_PUNTOS;

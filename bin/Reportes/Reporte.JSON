@@ -2,12 +2,12 @@
 {
 "Valor": "https://facebook.com",
 "ExpresionRegular": "url",
-"ExpresionRegular": "Cadena valida"
+"ExpresionRegular": "Cadena no valida"
 },
 {
 "Valor": "lachalana666@ingusac.com",
 "ExpresionRegular": "correoElectronico",
-"ExpresionRegular": "Cadena valida"
+"ExpresionRegular": "Cadena no valida"
 }
 ]
 
