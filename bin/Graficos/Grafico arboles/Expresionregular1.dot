@@ -1,0 +1,69 @@
+digraph G{
+rankdir=UD
+node[shape=box]
+concentrate=true
+nodo8[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>N</td></tr>
+<tr><td>1,</td><td>.</td><td>4</td></tr>
+<tr><td>0</td></tr>
+</table>
+>];
+nodo6[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>N</td></tr>
+<tr><td>1,</td><td>.</td><td>1,2,3,</td></tr>
+<tr><td>0</td></tr>
+</table>
+>];
+nodo1[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>N</td></tr>
+<tr><td>1,</td><td>letra</td><td>1,</td></tr>
+<tr><td>1</td></tr>
+</table>
+>];
+nodo6->nodo1
+nodo5[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>A</td></tr>
+<tr><td>2,3,</td><td>*</td><td>2,3,</td></tr>
+<tr><td>0</td></tr>
+</table>
+>];
+nodo4[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>N</td></tr>
+<tr><td>2,3,</td><td>|</td><td>2,3,</td></tr>
+<tr><td>0</td></tr>
+</table>
+>];
+nodo2[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>N</td></tr>
+<tr><td>2,</td><td>letra</td><td>2,</td></tr>
+<tr><td>2</td></tr>
+</table>
+>];
+nodo4->nodo2
+nodo3[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>N</td></tr>
+<tr><td>3,</td><td>digito</td><td>3,</td></tr>
+<tr><td>3</td></tr>
+</table>
+>];
+nodo4->nodo3
+nodo5->nodo4
+nodo6->nodo5
+nodo8->nodo6
+nodo7[label=<
+<table border='0' cellborder='1' color='blue' cellspacing='0'>
+<tr><td>N</td></tr>
+<tr><td>4</td><td>#</td><td>4</td></tr>
+<tr><td>4</td></tr>
+</table>
+>];
+nodo8->nodo7
+
+}

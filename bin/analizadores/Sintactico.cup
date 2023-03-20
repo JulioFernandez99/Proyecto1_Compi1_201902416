@@ -1,0 +1,984 @@
+package analizadores; 
+import java_cup.runtime.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import main.metodoarbol.Nodo;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+parser code {:
+
+
+public static int contid=1;
+	public static int IDS=1;
+	public static Nodo Raiz;
+	public static String nm;
+	
+	public static HashMap lexemas=new HashMap();
+	public static HashMap siguientes=new HashMap();
+	public static HashMap hojas=new HashMap();
+	public static HashMap sigs=new HashMap();
+	
+	public static HashMap estados=new HashMap();
+	public static ArrayList aceptacion=new ArrayList();
+	public static int contadorEstados=0;
+	public static int verificar=0;
+	
+	public static HashMap conjuntos=new HashMap();
+	public static HashMap exps=new HashMap();
+	public static String expReg="";
+	public static HashMap estadosAlrv=new HashMap();
+	
+	public static String codigoAFD="";//enlace de nodos
+	public static String codigoNodos="";//creacion de nodos
+	
+	public static boolean p_a=false;//para or
+	public static String cerrar="";
+	
+	public static String json="";
+
+	
+	public static boolean p_aC=false;//para conca
+	
+	public static HashMap expRegVerificada=new HashMap();
+	
+	public static void graficarArbol(Nodo act, String nombre){
+        FileWriter fichero = null;
+        PrintWriter pw = null;
+        try {
+            fichero = new FileWriter("src/Graficos/Grafico arboles/" + nombre + ".dot");
+            pw = new PrintWriter(fichero);
+            pw.println("digraph G{");
+            pw.println("rankdir=UD");
+            pw.println("node[shape=box]");
+            pw.println("concentrate=true");
+            pw.println(act.getCodigoInterno());
+            pw.println("}");
+        } catch (Exception e) {
+            System.out.println("error, no se realizo el archivo"+e);
+        } finally {
+            try {
+                if (null != fichero) {
+                    fichero.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        //para compilar el archivo dot y obtener la imagen
+        try {
+            //direcci�n doonde se ecnuentra el compilador de graphviz
+            String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
+            //direcci�n del archivo dot
+            String fileInputPath = "src/Graficos/Grafico arboles/" + nombre + ".dot";
+            //direcci�n donde se creara la magen
+            String fileOutputPath = "src/Graficos/Grafico arboles/" + nombre + ".jpg";
+            //tipo de convers�n
+            String tParam = "-Tjpg";
+            String tOParam = "-o";
+
+            String[] cmd = new String[5];
+            cmd[0] = dotPath;
+            cmd[1] = tParam;
+            cmd[2] = fileInputPath;
+            cmd[3] = tOParam;
+            cmd[4] = fileOutputPath;
+
+            Runtime rt = Runtime.getRuntime();
+
+            rt.exec(cmd);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+        }
+    }
+    
+	
+	public static String pop(String str) {
+		if (str == null) {
+			return null;
+		}
+		return str.replaceFirst(",$", "");
+	}
+
+	
+	
+	public static void recorrido(Nodo raiz) {
+		
+		if(raiz!=null){
+    		//System.out.println(raiz.getValor());
+    		recorrido(raiz.hizq);
+    		
+    		if(raiz.getIdentificador()!=0) {
+    			hojas.put(String.valueOf(raiz.getIdentificador()), raiz.getValor());
+    		}
+    		
+    		if(raiz.getValor()==".") {
+    			if(siguientes.containsKey(pop(raiz.hizq.getUltimo()))) {
+    				siguientes.replace(pop(raiz.hizq.getUltimo()), siguientes.get(pop(raiz.hizq.getUltimo()))+","+pop(raiz.hder.getprimero()));
+    			}else {
+    				siguientes.put(pop(raiz.hizq.getUltimo()), pop(raiz.hder.getprimero()));
+    			}
+    			
+    		}
+    		
+    		if(raiz.getValor()=="*" || raiz.getValor()=="+") { // || raiz.getValor()=="?"
+    			if(siguientes.containsKey(pop(raiz.getUltimo()))) {
+    				siguientes.replace(pop(raiz.getUltimo()), siguientes.get(pop(raiz.getprimero()))+","+pop(raiz.getprimero()));
+    			}
+    			else {
+    				siguientes.put(pop(raiz.getUltimo()), pop(raiz.getprimero()));
+    			}
+    			
+    		}
+    		
+    		recorrido(raiz.hder);
+		}
+	}
+	
+	
+	
+	public static void inOrden() {
+		siguientes.clear();
+		sigs.clear();
+		hojas.clear();
+		
+		estados.clear();
+		aceptacion.clear();
+		verificar=0;
+    	contadorEstados=0;
+    	contid=1;
+    	IDS=1;
+    	
+    	
+    	expReg="";
+    	
+    	estadosAlrv.clear();
+    	codigoAFD="";
+    	codigoNodos="";
+    	
+    	
+		recorrido(Raiz);
+		//System.out.println(siguientes);
+		//System.out.println(hojas);
+		generarSiguientes();
+		
+	}
+	
+	public static void generarSiguientes() {
+		String llavess=siguientes.keySet().toString();
+		String valss=siguientes.values().toString().replace("[", "").replace("]", "").replace(" ", "");
+		
+		String llaves[]=siguientes.keySet().toString().replace("[", "").replace("]", "").replace(" ", "").split(",");
+		String vals[]=siguientes.values().toString().replace("[", "").replace("]", "").replace(" ", "").split(",");
+		
+		//recorriendo llaves 
+		for(int i=0;i<llaves.length;i++) {
+				//System.out.println(llaves.charAt(i));
+				if(!sigs.containsKey(llaves[i])) {
+					sigs.put(llaves[i],"");
+				}
+			
+		}
+		
+		//recorriendo valores
+		for(int i=0;i<vals.length;i++) {
+			
+				//System.out.println(vals.charAt(i));
+				if(!sigs.containsKey(vals[i])) {
+					sigs.put(vals[i],"");
+				}
+			
+		}
+		
+		
+		
+		
+		llavess=llavess.replace("[", "").replace("]", "");
+		String  tempLlaves[];
+		tempLlaves=llavess.split(", ");
+		for(int i=0;i<tempLlaves.length;i++) {
+			String data[]=tempLlaves[i].split(",");
+			String dat=tempLlaves[i];
+			//System.out.println("Llave#"+(i+1));
+			//System.out.println(data);
+			
+			for(int j=0;j<data.length;j++) {
+					//System.out.println(data[j]);
+					String llave=data[j];
+					String valor="";
+					if(siguientes.containsKey(llave)) {
+						valor=siguientes.get(llave).toString();
+					}
+					else if(!siguientes.containsKey(llave)) {
+						valor=siguientes.get(dat).toString();
+					}
+					
+					
+					
+					String valAntig=sigs.get(llave).toString();
+					String valNew=siguientes.get(dat).toString();
+					String val=valNew+","+valAntig;
+					//System.out.println(val);
+					sigs.replace(llave,pop(val));
+		}
+		}
+		
+		
+		
+		
+		
+		String sigsLlavs[]=sigs.keySet().toString().replace("[", "").replace("]","").replace(" ", "").split(",");
+		
+		for(int i=0;i<sigsLlavs.length;i++) {
+			ArrayList rs = new ArrayList();
+			
+				
+			
+			
+			String tempVals[]=sigs.get(sigsLlavs[i]).toString().split(",");
+			//System.out.println("------LLave"+sigsLlavs[i]+"-------");
+			for(int j=0;j<tempVals.length;j++) {
+				rs.add(tempVals[j]);
+			}
+			HashSet hs = new HashSet(); 
+			hs.addAll(rs); 
+			rs.clear(); 
+			rs.addAll(hs);
+			//System.out.println(rs);
+			sigs.replace(sigsLlavs[i], rs.toString().replace("[", "").replace("]",""));
+			
+		}
+		
+	
+		grafTabSiguientes();
+		
+		//Metiendo raiz.primero como s0
+		estados.put("S0",pop(Raiz.getprimero()));
+		estadosAlrv.put(pop(Raiz.getprimero()),"S0");
+		contadorEstados++;
+		
+		generarEstados();
+		generarTrassiciones();
+		grafEstados();
+		genenerarExpReg(Raiz);
+		expReg=expReg.replace("#", "").replace("\"", "").replace(" ","\" \"" ).replace(".", "").replace("�", ".");
+		
+		String conj[]=conjuntos.keySet().toString().replace("[", "").replace("]", "").replace(" ", "").split(",");
+		for(int i=0;i<conj.length;i++) {
+			expReg=expReg.replace(conj[i],conjuntos.get(conj[i]).toString());
+			
+		}
+		exps.put(nm, expReg); 
+		
+		
+		
+		
+		System.out.println("Siguientes: "+siguientes);
+		System.out.println("Sigs: "+sigs);
+		System.out.println("Hojas: "+hojas);
+		System.out.println("Estados: "+estados);
+		System.out.println("Expresiones: "+conjuntos);
+		System.out.println("Aceptacion: "+aceptacion);
+		System.out.println("Nombre: "+nm);
+		System.out.println("Expresion regular: "+expReg);
+		System.out.println("Expresiones Regulares: "+exps);
+		//System.out.println("Estados: "+estados);
+	}
+	
+	public static void grafTabSiguientes() {
+			
+			String cod="";
+			cod+="digraph {\n"
+					+ "  node [ shape=none fontname=Helvetica ]\n"
+					+ " n1 [ label = <\n"
+					+ "<table>\n"
+					+ "<tr><td colspan=\"2\" bgcolor=\"cadetblue\">Hojas</td><td colspan=\"1\" bgcolor=\"crimson\">Siguientes</td></tr>\n";
+			
+			String llaves=sigs.keySet().toString();
+			llaves=llaves.replace("[", "").replace("]", "");
+			String  tempLlaves[];
+			tempLlaves=llaves.split(", ");
+			
+			//System.out.println("Imprimiendo llaves desde metodo grafico siguientes");
+			for(int i=0;i<tempLlaves.length;i++) {
+				String id_hoja=tempLlaves[i];
+				String hoja=hojas.get(id_hoja).toString();
+				//System.out.println(id_hoja+"-"+hoja);
+				String s=sigs.get(tempLlaves[i]).toString();//(String) sigs.get(tempLlaves[i].charAt(0));
+				cod+="<tr><td bgcolor=\"darkgoldenrod1\">"+id_hoja+"</td><td bgcolor=\"darkseagreen4\">"+hoja+"</td><td bgcolor=\"cyan3\">"+s+"</td></tr>";		 
+			}
+			
+			cod+=" </table>>]\n"
+					+ "}";
+			
+			
+			
+			
+			
+			
+			FileWriter fichero = null;
+	        PrintWriter pw = null;
+	        try {
+	            fichero = new FileWriter("src/Graficos/Grafico siguientes/" +nm+ ".dot");
+	            pw = new PrintWriter(fichero);
+	            pw.println(cod);
+	        } catch (Exception e) {
+	            System.out.println("error, no se realizo el archivo"+e);
+	        } finally {
+	            try {
+	                if (null != fichero) {
+	                    fichero.close();
+	                }
+	            } catch (Exception e2) {
+	                e2.printStackTrace();
+	            }
+	        }
+	        //para compilar el archivo dot y obtener la imagen
+	        try {
+	            //direcciï¿½n doonde se ecnuentra el compilador de graphviz
+	            String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
+	            //direcciï¿½n del archivo dot
+	            String fileInputPath = "src/Graficos/Grafico siguientes/" +nm+ ".dot";
+	            //direcciï¿½n donde se creara la magen
+	            String fileOutputPath = "src/Graficos/Grafico siguientes/" + nm +".jpg";
+	            //tipo de conversï¿½n
+	            String tParam = "-Tjpg";
+	            String tOParam = "-o";
+	
+	            String[] cmd = new String[5];
+	            cmd[0] = dotPath;
+	            cmd[1] = tParam;
+	            cmd[2] = fileInputPath;
+	            cmd[3] = tOParam;
+	            cmd[4] = fileOutputPath;
+	
+	            Runtime rt = Runtime.getRuntime();
+	
+	            rt.exec(cmd);
+	
+	        } catch (Exception ex) {
+	            ex.printStackTrace();
+	        } finally {
+	        }
+		
+	        System.out.println(" -----------------------------------------");
+	        System.out.println("| Tabla de siguientes generada con exito |");
+	        System.out.println(" -----------------------------------------");
+		}
+	
+	
+	
+	public static void generarEstados() {
+		
+		
+		 if(verificar!=contadorEstados) {		
+	     		System.out.println("verificando el estado S"+verificar);
+	     		String cad="S"+verificar;
+	         	
+	     		
+	     		String tempsEstados[]=estados.get(cad).toString().split(",");
+	     		
+	     		
+	     		for(int i=0;i<tempsEstados.length;i++) {
+	     			//System.out.println(tempsEstados[i]);
+	     			String rps="";
+	     			if(tempsEstados[i]!="") {
+		         		rps+=sigs.get(tempsEstados[i]).toString().replace(" ", "");
+		         		//System.out.println(tempsEstados[i]+" - : "+rps);
+		         		for(int j=i+1;j<tempsEstados.length;j++) {
+		         			if(hojas.get(tempsEstados[i]).equals(hojas.get(tempsEstados[j]))) {
+		         				rps+=","+sigs.get(tempsEstados[j]).toString().replace(" ", "");
+		         				
+		         				tempsEstados[j]="";
+		         				
+		         			}
+		         		}
+		         		
+		     			//System.out.println("rps: "+rps);
+		     			
+		     			if(!estados.containsValue(rps) && rps!="") {
+		     				
+		     				
+		    											
+							for(int c=0;c<rps.length();c++) {
+								if(sigs.get(rps.charAt(c))=="") {
+									aceptacion.add(("S"+contadorEstados));
+								}
+							}					
+		    				estados.put(("S"+(contadorEstados)),rps);
+		    				estadosAlrv.put(rps,("S"+(contadorEstados)));
+		    				contadorEstados++;
+		    				verificar++;
+		    				//System.out.println("Con "+rps+" salgo a S"+verificar);
+		    				generarEstados();
+					}
+	     		}
+	     	}
+		 }		 
+ }   		
+	     	
+	 public static void generarTrassiciones() {
+		 
+		 
+		 String std[]=estados.keySet().toString().replace("[", "").replace("]", "").replace(" ", "").replace("S", "").split(",");
+		 
+		 
+		 int[] values = Arrays.stream(std)
+                 .mapToInt(Integer::parseInt)
+                 .toArray();
+ 		 Arrays.sort(values);
+    	 
+ 		for(int i=0;i<std.length;i++) {
+ 			std[i]="S"+String.valueOf(values[i]);
+ 		}
+ 		
+ 		
+ 		
+ 		
+ 		
+ 		
+ 		for(int i=0;i<std.length;i++) {
+ 			String valEstado[]=estados.get(std[i]).toString().replace(" ", "").split(",");
+ 			for(int m=0;m<valEstado.length;m++) {
+ 				if(hojas.get(valEstado[m])=="#") {
+ 					System.out.println(std[i]+" aceptado");
+ 					aceptacion.add(std[i]);
+ 				}
+ 				
+ 			}
+ 			
+ 			
+ 			System.out.println("----------------"+std[i]+"----------------");
+ 			System.out.println(Arrays.toString(valEstado));
+ 			for(int m=0;m<valEstado.length;m++) {
+ 				String rps="";
+ 				
+ 				if(valEstado[m]!="" && hojas.get(valEstado[m])!="#") {
+ 					rps+=sigs.get(valEstado[m]).toString().replace(" ", "");
+ 					String transi="";
+ 					transi=hojas.get(valEstado[m]).toString();
+ 				
+	 				for(int s=m+1;s<valEstado.length;s++) {
+	 					if(hojas.get(valEstado[m]).equals(hojas.get(valEstado[s]))) {
+	         				rps+=","+sigs.get(valEstado[s]).toString();
+	         				
+	         				valEstado[s]="";
+	         				
+	         			}
+	 				}
+	 				
+	 				if(transi.equals("\" \"")) {
+	 					transi="\\\" \\\"";
+	 				}
+	 				else {
+	 					transi=transi.replace("\"", "");
+	 				}
+	 				System.out.println("Transi: "+transi);
+	 				System.out.println("RPS: "+rps);
+	 				System.out.println(std[i]+"->"+transi+"->"+estadosAlrv.get(rps));
+	 				codigoAFD+=std[i]+"->"+estadosAlrv.get(rps)+" "+"[label=\""+transi+"\"]\n";
+ 				}
+ 				
+ 				
+ 			}
+ 			
+ 			/*
+ 			 * for(int j=0;j<valEstado.length;j++) {
+ 				String siguiente=sigs.get(valEstado[j]).toString().replace(" ", "");
+ 				System.out.println(std[i]+"="+valEstado[j]+"="+hojas.get(valEstado[j])+"="+siguiente+"->"+estadosAlrv.get(siguiente));
+ 				
+ 			}
+ 			 */
+ 			
+ 		}
+ 		
+ 		
+ 		for(int i=0;i<std.length;i++) {
+ 			if(aceptacion.contains(std[i])) {
+ 				codigoNodos+=std[i]+" [shape=doublecircle label=\""+std[i]+"\"] \n";
+ 			}
+ 			else {
+ 				codigoNodos+=std[i]+" [shape=circle label=\""+std[i]+"\"] \n";
+ 			}
+ 			
+ 		}
+ 		
+ 		System.out.println(codigoNodos);
+ 		System.out.println(codigoAFD);
+ 		grafAFD(codigoNodos, codigoAFD);
+ 		System.out.println(estados);
+ 		System.out.println(estadosAlrv);
+ 		
+	 }
+		
+		
+		
+	public static void grafEstados() {
+		
+		
+	    	
+	   
+	    	
+	    String cod="";
+		cod+="digraph {\n"
+				+ "  node [ shape=none fontname=Helvetica ]\n"
+				+ " n1 [ label = <\n"
+				+ "<table>\n"
+				+ " <tr><td colspan=\"1\" bgcolor=\"brown1\">Simbolo</td> <td colspan=\"1\" bgcolor=\"cadetblue\">Estado</td><td colspan=\"1\" bgcolor=\"darksalmon\">Aceptacion</td></tr>";
+			
+	   
+		 String tempEstados[]=estados.keySet().toString().replace("[", "").replace("]", "").replace(" ", "").replace("S", "").split(",");
+		
+		 
+		 int[] values = Arrays.stream(tempEstados)
+                 .mapToInt(Integer::parseInt)
+                 .toArray();
+ 		 Arrays.sort(values);
+    	 
+ 		for(int i=0;i<tempEstados.length;i++) {
+ 			tempEstados[i]="S"+String.valueOf(values[i]);
+ 		}
+ 		
+		 	
+		  for(int i=0;i<tempEstados.length;i++) {
+			  
+			  if(aceptacion.contains(tempEstados[i])) {
+		    		cod+=" <tr><td bgcolor=\"darkolivegreen1\">"+estados.get(tempEstados[i])+"</td><td bgcolor=\"coral\">"+(tempEstados[i])+ "</td> <td bgcolor=\"coral\"> True </td></tr>";
+		    	}
+		    	else {
+		    		cod+=" <tr><td bgcolor=\"darkolivegreen1\">"+estados.get(tempEstados[i])+"</td><td bgcolor=\"coral\">"+(tempEstados[i])+ "</td> <td bgcolor=\"coral\"> False </td></tr>";
+		    	}
+		    	
+		   }
+		
+		 cod+=" </table>>]\n"
+				+ "}";
+		
+		//System.out.println(cod);
+		
+		
+		
+		
+		FileWriter fichero = null;
+        PrintWriter pw = null;
+        try {
+            fichero = new FileWriter("src/Graficos/Grafico estados/" +nm+ ".dot");
+            pw = new PrintWriter(fichero);
+            pw.println(cod);
+        } catch (Exception e) {
+            System.out.println("error, no se realizo el archivo"+e);
+        } finally {
+            try {
+                if (null != fichero) {
+                    fichero.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        //para compilar el archivo dot y obtener la imagen
+        try {
+            //direcciï¿½n doonde se ecnuentra el compilador de graphviz
+            String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
+            //direcciï¿½n del archivo dot
+            String fileInputPath = "src/Graficos/Grafico estados/" +nm+ ".dot";
+            //direcciï¿½n donde se creara la magen
+            String fileOutputPath = "src/Graficos/Grafico estados/" + nm +".jpg";
+            //tipo de conversï¿½n
+            String tParam = "-Tjpg";
+            String tOParam = "-o";
+
+            String[] cmd = new String[5];
+            cmd[0] = dotPath;
+            cmd[1] = tParam;
+            cmd[2] = fileInputPath;
+            cmd[3] = tOParam;
+            cmd[4] = fileOutputPath;
+
+            Runtime rt = Runtime.getRuntime();
+
+            rt.exec(cmd);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+        }
+	
+        System.out.println(" -----------------------------------------");
+        System.out.println("| Tabla de estados generada con exito |");
+        System.out.println(" -----------------------------------------");
+	}
+	
+	
+	
+	public static void grafAFD(String nodos,String enlaces) {
+		
+		String cadena="";
+    	cadena+="digraph G {\n"
+    			+ "  rankdir=LR \n";
+    	
+    	cadena+=nodos;
+    	cadena+=enlaces;
+    	cadena+="}";
+				
+		
+		FileWriter fichero = null;
+        PrintWriter pw = null;
+        try {
+            fichero = new FileWriter("src/Graficos/Grafico AFD/" + nm + ".dot");
+            pw = new PrintWriter(fichero);
+            pw.println(cadena);
+        } catch (Exception e) {
+            System.out.println("error, no se realizo el archivo"+e);
+        } finally {
+            try {
+                if (null != fichero) {
+                    fichero.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        //para compilar el archivo dot y obtener la imagen
+        try {
+            //direcci�n doonde se ecnuentra el compilador de graphviz
+            String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
+            //direcci�n del archivo dot
+            String fileInputPath = "src/Graficos/Grafico AFD/" + nm + ".dot";
+            //direcci�n donde se creara la magen
+            String fileOutputPath = "src/Graficos/Grafico AFD/" + nm + ".jpg";
+            //tipo de convers�n
+            String tParam = "-Tjpg";
+            String tOParam = "-o";
+
+            String[] cmd = new String[5];
+            cmd[0] = dotPath;
+            cmd[1] = tParam;
+            cmd[2] = fileInputPath;
+            cmd[3] = tOParam;
+            cmd[4] = fileOutputPath;
+
+            Runtime rt = Runtime.getRuntime();
+
+            rt.exec(cmd);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+        }
+
+  	 
+        System.out.println(" -----------------------------------------");
+        System.out.println("|      Grafo AFD generada con exito       |");
+        System.out.println(" -----------------------------------------");
+        
+        System.out.println(cadena);
+		
+		
+	}
+	
+	
+
+	public static void genenerarExpReg(Nodo r) {
+		
+		if(r!=null) {
+			
+			
+			if(r.getValor()=="|" && p_a==false) {
+				expReg+="(";
+				cerrar=r.getprimero();
+				p_a=true;
+			}
+			
+			
+			
+			
+			genenerarExpReg(r.getHizq());
+			
+			if(r.getValor().equals("\".\"")) {
+				expReg+="�";
+			}
+			expReg+=r.getValor();
+			
+			
+			
+			
+			genenerarExpReg(r.hder);
+			
+			 if(r.getValor()=="|" && p_a==true && r.getprimero()==cerrar) {
+					expReg+=")";
+					p_a=false;
+					cerrar="";
+				}
+			
+		}
+	}
+	    
+	public static void verificarExpReg(String nom,String lx) {
+		
+		System.out.println("+++ "+nom+" - "+lx);
+		String lex="";
+		for(int i=1;i<lx.length()-1;i++) {
+			lex+=lx.charAt(i);
+		}
+		
+		if(exps.containsKey(nom)) {
+			json+="{\n";
+			json+="\"Valor\": \""+lex+"\",\n";
+			json+="\"ExpresionRegular\": \""+nom+"\",\n";
+			String patron=exps.get(nom).toString().replace("\" \"", "\\s");
+			lex=lex.replace("\\", "");
+			System.out.println("Patron: "+patron+" Cadena a evaluar: "+lex);
+			
+			
+			Pattern pat = Pattern.compile(patron);
+		    Matcher mat = pat.matcher(lex);                                                                           
+		    if (mat.matches()) {
+		    	json+="\"ExpresionRegular\": \""+"Cadena valida"+"\"\n";
+		      
+		    } else {
+		    	json+="\"ExpresionRegular\": \""+"Cadena no valida"+"\"\n";                                                                             
+		    }
+		    json+="},\n";
+		}
+		else {
+			System.out.println("No existe un patron para la expresion regular: "+nom);
+		}
+			
+	}
+
+	public static void reporteJson() {
+		String cadena="";
+		cadena+="[\n";
+		cadena+=pop(json);
+		cadena+="]\n";
+		System.out.println(cadena);
+		FileWriter fichero = null;
+        PrintWriter pw = null;
+        try {
+            fichero = new FileWriter("src/Reportes/" + "Reporte" + ".JSON");
+            pw = new PrintWriter(fichero);
+            pw.println(cadena);
+
+        } catch (Exception e) {
+            System.out.println("error, no se realizo el archivo"+e);
+        } finally {
+            try {
+                if (null != fichero) {
+                    fichero.close();
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+            }
+        }
+        
+	}
+	
+
+
+:}
+
+terminal String OR,MAS,CONCA,PUNTO_COMA,DOS_PUNTOS;
+terminal String GUION,FLECHA,ASTERISCO,INTERROGACION;
+terminal String LLAVE_A,LLAVE_C,DELIMITADOR;
+terminal String NOMBRES,ID_CONJER,ECOM_EXP,ESP_CONJER;
+terminal String RESERVADA,CONJUNTO,LEXEMA;
+
+
+non terminal String INICIO,SENTENCIAS,POLACA,CONJU,CJ; //POLACA es la encargada de las expresiones regulares
+non terminal String LEX,LEXEME;
+non terminal Nodo NOTACIONER,ER;
+
+start with INICIO;
+
+INICIO::=SENTENCIAS;
+
+
+SENTENCIAS::=LLAVE_A {:
+			 parser.conjuntos.clear();
+			 parser.lexemas.clear();
+			 :}
+			 CONJU
+		     POLACA 
+		     
+		     DELIMITADOR
+		     DELIMITADOR
+		     {:System.out.println("Conjuntos: "+parser.conjuntos);:}
+		     LEX
+		    
+             {:parser.reporteJson();:}
+		     LLAVE_C {: parser.exps.clear();:} ;
+
+
+CONJU::=CONJU CJ
+	   |CJ;
+LEX::= LEX LEXEME
+	   |LEXEME;
+
+LEXEME::=NOMBRES:nom DOS_PUNTOS LEXEMA:lx {:parser.verificarExpReg(nom,lx);:} PUNTO_COMA;
+	 
+CJ::= RESERVADA DOS_PUNTOS NOMBRES:llave GUION FLECHA CONJUNTO:valor {:
+	  
+	  if(valor.contains("~")) {
+			valor="["+valor+"]";
+			valor=valor.replace("~", "-");
+		}
+		else {
+			valor="{"+valor+"}";
+		}
+		parser.conjuntos.put(llave,valor);
+	  :} 
+	  PUNTO_COMA {:System.out.println("esta es la linea del conjunto");:};
+
+
+POLACA::= POLACA ER
+		   |ER;
+
+ER::=NOMBRES:a GUION FLECHA NOTACIONER:valor{:
+	 String prim=parser.IDS+"";
+	 String ult=parser.IDS+"";
+	 String prime;
+	 String ulti;
+	 Nodo nuevofinal=new Nodo(null,null,"#",parser.contid,parser.IDS,"N",prim,ult);
+	 parser.contid++;
+	 if(valor.getAnulable()=="A"){
+	 	prime=valor.getprimero()+ult;
+	 }else{
+	 	prime=valor.getprimero();
+	 }
+	 
+	 ulti=nuevofinal.getUltimo();
+	 Nodo nuevaraiz=new Nodo(valor,nuevofinal,".",parser.contid,0,"N",prime,ult);
+	 parser.Raiz=nuevaraiz;
+	 //System.out.println("Esta es la Raiz->"+parser.Raiz.getValor());
+	 parser.graficarArbol(nuevaraiz,a);
+	 parser.nm=a;
+	 parser.IDS=1;
+	 
+	:} PUNTO_COMA
+	{:
+		parser.inOrden();
+		//System.out.println(parser.sigs);
+		//System.out.println(parser.hojas);
+		
+		
+	:}
+	;
+	
+	
+NOTACIONER::=OR NOTACIONER:a NOTACIONER:b{:
+				String an;
+				if(a.getAnulable()=="A" || b.getAnulable()=="A"){
+					an="A";
+				}else{
+					an="N";
+				}
+				
+				String prim=a.getprimero()+b.getprimero();
+				String ult=a.getUltimo()+b.getUltimo();
+				
+				Nodo nuevaOr=new Nodo(a,b,"|",parser.contid,0,an,prim,ult);
+				parser.contid++;
+				RESULT=nuevaOr;
+			:}
+			
+			
+			|CONCA NOTACIONER:a NOTACIONER:b{:
+				String an;
+				String prim;
+				String ult;
+				if(a.getAnulable()=="A" && b.getAnulable()=="A"){
+					an="A";
+				}else{
+					an="N";
+				}
+				
+				if(a.getAnulable()=="A"){
+					prim=a.getprimero()+b.getprimero();
+				}else{
+					prim=a.getprimero();
+				}
+				
+				if(b.getAnulable()=="A"){
+					ult=a.getUltimo()+b.getUltimo();
+				}else{
+					ult=b.getUltimo();
+				}
+				Nodo nuevaCon=new Nodo(a,b,".",parser.contid,0,an,prim,ult);
+				parser.contid++;
+				RESULT=nuevaCon;
+			
+			:}
+			
+			|MAS NOTACIONER:a{:
+				String prim=a.getprimero();
+				String ult=a.getUltimo();
+				
+				Nodo nuevoMas=new Nodo(a,null,"+",parser.contid,0,"N",prim,ult);
+				parser.contid++;
+				RESULT=nuevoMas;
+			:}
+			
+			|ASTERISCO NOTACIONER:a{:
+				String prim=a.getprimero();
+				String ult=a.getUltimo();
+				
+				Nodo nuevoAst=new Nodo(a,null,"*",parser.contid,0,"A",prim,ult);
+				parser.contid++;
+				RESULT=nuevoAst;
+			:}
+			
+			|INTERROGACION NOTACIONER:a{:
+			
+				String prim=a.getprimero();
+				String ult=a.getUltimo();
+				Nodo nuevaInter=new Nodo(a,null,"?",parser.contid,0,"A",prim,ult);
+				parser.contid++;
+				RESULT=nuevaInter;			
+			:}
+			
+			|ID_CONJER:val{:
+			
+				String prim=parser.IDS+",";
+				String ult=parser.IDS+",";
+				Nodo nuevoidconer=new Nodo(null,null,val.replace("{","").replace("}",""),parser.contid,parser.IDS,"N",prim,ult);
+				
+				parser.IDS++;
+				parser.contid++;
+				
+				RESULT=nuevoidconer;
+			:}
+			
+			|ESP_CONJER:val{:
+			
+				String prim=parser.IDS+",";
+				String ult=parser.IDS+",";
+				Nodo esp=new Nodo(null,null,val,parser.contid,parser.IDS,"N",prim,ult);
+				
+				parser.IDS++;
+				parser.contid++;
+				RESULT=esp;
+			
+			:}
+			
+			|ECOM_EXP:val{:
+				String prim=parser.IDS+",";
+				String ult=parser.IDS+",";
+				Nodo nuevoDec=new Nodo(null,null,val,parser.contid,parser.IDS,"N",prim,ult);
+				parser.IDS++;
+				parser.contid++;
+				RESULT=nuevoDec;
+			
+			:};
+
+
+
+

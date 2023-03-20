@@ -1,0 +1,6 @@
+digraph {
+  node [ shape=none fontname=Helvetica ]
+ n1 [ label = <
+<table>
+ <tr><td colspan="1" bgcolor="brown1">Simbolo</td> <td colspan="1" bgcolor="cadetblue">Estado</td><td colspan="1" bgcolor="darksalmon">Aceptacion</td></tr> <tr><td bgcolor="darkolivegreen1">1</td><td bgcolor="coral">S0</td> <td bgcolor="coral"> False </td></tr> <tr><td bgcolor="darkolivegreen1">2,3,4,5</td><td bgcolor="coral">S1</td> <td bgcolor="coral"> True </td></tr> </table>>]
+}
