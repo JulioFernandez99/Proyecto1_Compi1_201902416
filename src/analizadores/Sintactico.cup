@@ -9,19 +9,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 parser code {:
-
-
-
-
-
-	public static int contid=1;
+public static int contid=1;
 	public static int IDS=1;
 	public static Nodo Raiz;
 	public static String nm;
 	
-	
+	public static HashMap lexemas=new HashMap();
 	public static HashMap siguientes=new HashMap();
 	public static HashMap hojas=new HashMap();
 	public static HashMap sigs=new HashMap();
@@ -38,6 +35,17 @@ parser code {:
 	
 	public static String codigoAFD="";//enlace de nodos
 	public static String codigoNodos="";//creacion de nodos
+	
+	public static boolean p_a=false;//para or
+	public static String cerrar="";
+	
+	public static String json="";
+
+	
+	public static boolean p_aC=false;//para conca
+	
+	public static HashMap expRegVerificada=new HashMap();
+	
 	public static void graficarArbol(Nodo act, String nombre){
         FileWriter fichero = null;
         PrintWriter pw = null;
@@ -63,13 +71,13 @@ parser code {:
         }
         //para compilar el archivo dot y obtener la imagen
         try {
-            //direcci�n doonde se ecnuentra el compilador de graphviz
+            //direcciï¿½n doonde se ecnuentra el compilador de graphviz
             String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
-            //direcci�n del archivo dot
+            //direcciï¿½n del archivo dot
             String fileInputPath = "src/Graficos/Grafico arboles/" + nombre + ".dot";
-            //direcci�n donde se creara la magen
+            //direcciï¿½n donde se creara la magen
             String fileOutputPath = "src/Graficos/Grafico arboles/" + nombre + ".jpg";
-            //tipo de convers�n
+            //tipo de conversï¿½n
             String tParam = "-Tjpg";
             String tOParam = "-o";
 
@@ -147,12 +155,13 @@ parser code {:
     	contid=1;
     	IDS=1;
     	
-    	conjuntos.clear();
+    	
     	expReg="";
-    	exps.clear();
+    	
     	estadosAlrv.clear();
     	codigoAFD="";
     	codigoNodos="";
+    	
     	
 		recorrido(Raiz);
 		//System.out.println(siguientes);
@@ -256,11 +265,19 @@ parser code {:
 		
 		generarEstados();
 		generarTrassiciones();
-		
-		
-		//grafAFD();
-		//genExpReg(Raiz);
 		grafEstados();
+		genenerarExpReg(Raiz);
+		expReg=expReg.replace("#", "").replace("\"", "").replace(" ","\" \"" ).replace(".", "").replace("°", ".");
+		
+		String conj[]=conjuntos.keySet().toString().replace("[", "").replace("]", "").replace(" ", "").split(",");
+		for(int i=0;i<conj.length;i++) {
+			expReg=expReg.replace(conj[i],conjuntos.get(conj[i]).toString());
+			
+		}
+		exps.put(nm, expReg); 
+		
+		
+		
 		
 		System.out.println("Siguientes: "+siguientes);
 		System.out.println("Sigs: "+sigs);
@@ -269,7 +286,8 @@ parser code {:
 		System.out.println("Expresiones: "+conjuntos);
 		System.out.println("Aceptacion: "+aceptacion);
 		System.out.println("Nombre: "+nm);
-		System.out.println("Expresion regular: "+expReg.replace(".", ""));
+		System.out.println("Expresion regular: "+expReg);
+		System.out.println("Expresiones Regulares: "+exps);
 		//System.out.println("Estados: "+estados);
 	}
 	
@@ -323,13 +341,13 @@ parser code {:
 	        }
 	        //para compilar el archivo dot y obtener la imagen
 	        try {
-	            //direcciï¿½n doonde se ecnuentra el compilador de graphviz
+	            //direcciÃ¯Â¿Â½n doonde se ecnuentra el compilador de graphviz
 	            String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
-	            //direcciï¿½n del archivo dot
+	            //direcciÃ¯Â¿Â½n del archivo dot
 	            String fileInputPath = "src/Graficos/Grafico siguientes/" +nm+ ".dot";
-	            //direcciï¿½n donde se creara la magen
+	            //direcciÃ¯Â¿Â½n donde se creara la magen
 	            String fileOutputPath = "src/Graficos/Grafico siguientes/" + nm +".jpg";
-	            //tipo de conversï¿½n
+	            //tipo de conversÃ¯Â¿Â½n
 	            String tParam = "-Tjpg";
 	            String tOParam = "-o";
 	
@@ -566,13 +584,13 @@ parser code {:
         }
         //para compilar el archivo dot y obtener la imagen
         try {
-            //direcciï¿½n doonde se ecnuentra el compilador de graphviz
+            //direcciÃ¯Â¿Â½n doonde se ecnuentra el compilador de graphviz
             String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
-            //direcciï¿½n del archivo dot
+            //direcciÃ¯Â¿Â½n del archivo dot
             String fileInputPath = "src/Graficos/Grafico estados/" +nm+ ".dot";
-            //direcciï¿½n donde se creara la magen
+            //direcciÃ¯Â¿Â½n donde se creara la magen
             String fileOutputPath = "src/Graficos/Grafico estados/" + nm +".jpg";
-            //tipo de conversï¿½n
+            //tipo de conversÃ¯Â¿Â½n
             String tParam = "-Tjpg";
             String tOParam = "-o";
 
@@ -629,13 +647,13 @@ parser code {:
         }
         //para compilar el archivo dot y obtener la imagen
         try {
-            //direcci�n doonde se ecnuentra el compilador de graphviz
+            //direcciï¿½n doonde se ecnuentra el compilador de graphviz
             String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
-            //direcci�n del archivo dot
+            //direcciï¿½n del archivo dot
             String fileInputPath = "src/Graficos/Grafico AFD/" + nm + ".dot";
-            //direcci�n donde se creara la magen
+            //direcciï¿½n donde se creara la magen
             String fileOutputPath = "src/Graficos/Grafico AFD/" + nm + ".jpg";
-            //tipo de convers�n
+            //tipo de conversï¿½n
             String tParam = "-Tjpg";
             String tOParam = "-o";
 
@@ -667,17 +685,92 @@ parser code {:
 	
 	
 
-    
+	public static void genenerarExpReg(Nodo r) {
+		
+		if(r!=null) {
+			
+			
+			if(r.getValor()=="|" && p_a==false) {
+				expReg+="(";
+				cerrar=r.getprimero();
+				p_a=true;
+			}
+			
+			
+			
+			
+			genenerarExpReg(r.getHizq());
+			
+			if(r.getValor().equals("\".\"")) {
+				expReg+="°";
+			}
+			expReg+=r.getValor();
+			
+			
+			
+			
+			genenerarExpReg(r.hder);
+			
+			 if(r.getValor()=="|" && p_a==true && r.getprimero()==cerrar) {
+					expReg+=")";
+					p_a=false;
+					cerrar="";
+				}
+			
+		}
+	}
+	    
+	public static void verificarExpReg(String nom,String lx) {
+		
+		System.out.println("+++ "+nom+" - "+lx);
+		String lex="";
+		for(int i=1;i<lx.length()-1;i++) {
+			lex+=lx.charAt(i);
+		}
+		
+		if(exps.containsKey(nom)) {
+			json+="{\n";
+			json+="\"Valor\": \""+lex+"\",\n";
+			json+="\"ExpresionRegular\": \""+nom+"\",\n";
+			String patron=exps.get(nom).toString();
+			System.out.println("Patron: "+patron+" Cadena a evaluar: "+lex);
+			
+			
+			Pattern pat = Pattern.compile(patron);
+		    Matcher mat = pat.matcher(lex);                                                                           
+		    if (mat.matches()) {
+		    	json+="\"ExpresionRegular\": \""+"Cadena valida"+"\",\n";
+		      
+		    } else {
+		    	json+="\"ExpresionRegular\": \""+"Cadena no valida"+"\",\n";                                                                             
+		    }
+		    json+="},\n";
+		}
+		else {
+			System.out.println("No existe un patron para la expresion regular: "+nom);
+		}
+			
+	}
+
+	public static void reporteJson() {
+		String cadena="";
+		cadena+="[\n";
+		cadena+=pop(json);
+		cadena+="[\n";
+		System.out.println(cadena);
+	}
+
 :}
 
 terminal String OR,MAS,CONCA,PUNTO_COMA,DOS_PUNTOS;
 terminal String GUION,FLECHA,ASTERISCO,INTERROGACION;
 terminal String LLAVE_A,LLAVE_C,DELIMITADOR;
 terminal String NOMBRES,ID_CONJER,ECOM_EXP,ESP_CONJER;
-terminal String RESERVADA,CONJUNTO;
+terminal String RESERVADA,CONJUNTO,LEXEMA;
 
 
 non terminal String INICIO,SENTENCIAS,POLACA,CONJU,CJ; //POLACA es la encargada de las expresiones regulares
+non terminal String LEX,LEXEME;
 non terminal Nodo NOTACIONER,ER;
 
 start with INICIO;
@@ -685,21 +778,41 @@ start with INICIO;
 INICIO::=SENTENCIAS;
 
 
-SENTENCIAS::=LLAVE_A {:parser.conjuntos.clear();:}
+SENTENCIAS::=LLAVE_A {:
+			 parser.conjuntos.clear();
+			 parser.lexemas.clear();
+			 :}
 			 CONJU
 		     POLACA 
 		     
 		     DELIMITADOR
 		     DELIMITADOR
-		     {: System.out.println("Conjuntos: "+parser.conjuntos);:}
-		     
+		     {:System.out.println("Conjuntos: "+parser.conjuntos);:}
+		     LEX
+		    
+             {:parser.reporteJson();:}
 		     LLAVE_C {: parser.exps.clear();:} ;
 
 
 CONJU::=CONJU CJ
 	   |CJ;
+LEX::= LEX LEXEME
+	   |LEXEME;
+
+LEXEME::=NOMBRES:nom DOS_PUNTOS LEXEMA:lx {:parser.verificarExpReg(nom,lx);:} PUNTO_COMA;
 	 
-CJ::= RESERVADA DOS_PUNTOS NOMBRES:llave GUION FLECHA CONJUNTO:valor {:parser.conjuntos.put(llave,valor);:}PUNTO_COMA {:System.out.println("esta es la linea del conjunto");:};
+CJ::= RESERVADA DOS_PUNTOS NOMBRES:llave GUION FLECHA CONJUNTO:valor {:
+	  
+	  if(valor.contains("~")) {
+			valor="["+valor+"]";
+			valor=valor.replace("~", "-");
+		}
+		else {
+			valor="{"+valor+"}";
+		}
+		parser.conjuntos.put(llave,valor);
+	  :} 
+	  PUNTO_COMA {:System.out.println("esta es la linea del conjunto");:};
 
 
 POLACA::= POLACA ER
@@ -785,7 +898,7 @@ NOTACIONER::=OR NOTACIONER:a NOTACIONER:b{:
 				String prim=a.getprimero();
 				String ult=a.getUltimo();
 				
-				Nodo nuevoMas=new Nodo(null,a,"+",parser.contid,0,"N",prim,ult);
+				Nodo nuevoMas=new Nodo(a,null,"+",parser.contid,0,"N",prim,ult);
 				parser.contid++;
 				RESULT=nuevoMas;
 			:}
@@ -794,7 +907,7 @@ NOTACIONER::=OR NOTACIONER:a NOTACIONER:b{:
 				String prim=a.getprimero();
 				String ult=a.getUltimo();
 				
-				Nodo nuevoAst=new Nodo(null,a,"*",parser.contid,0,"A",prim,ult);
+				Nodo nuevoAst=new Nodo(a,null,"*",parser.contid,0,"A",prim,ult);
 				parser.contid++;
 				RESULT=nuevoAst;
 			:}
@@ -803,7 +916,7 @@ NOTACIONER::=OR NOTACIONER:a NOTACIONER:b{:
 			
 				String prim=a.getprimero();
 				String ult=a.getUltimo();
-				Nodo nuevaInter=new Nodo(null,a,"?",parser.contid,0,"A",prim,ult);
+				Nodo nuevaInter=new Nodo(a,null,"?",parser.contid,0,"A",prim,ult);
 				parser.contid++;
 				RESULT=nuevaInter;			
 			:}
@@ -841,20 +954,6 @@ NOTACIONER::=OR NOTACIONER:a NOTACIONER:b{:
 				RESULT=nuevoDec;
 			
 			:};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
