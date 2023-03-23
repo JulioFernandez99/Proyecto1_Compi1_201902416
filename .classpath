@@ -8,5 +8,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="Lib/java-cup-11a.jar"/>
 	<classpathentry kind="lib" path="Lib/JFlex.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Lenovo/eclipse-workspace/Proyecto1Compi1/Lib/JTattoo-1.6.13.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

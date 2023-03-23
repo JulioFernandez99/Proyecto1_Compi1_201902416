@@ -20,6 +20,8 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
 /** CUP v0.11a beta 20060608 generated parser.
   * @version Sun Mar 19 23:28:29 CST 2023
   */
@@ -198,11 +200,17 @@ public static int contid=1;
 	
 	public static HashMap expRegVerificada=new HashMap();
 	
+	public void syntax_error(Symbol s) {
+		JOptionPane.showMessageDialog(null, "Error de sintaxis "+(s.value)+" en la linea "+(s.left),
+				  "Error", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	
 	public static void graficarArbol(Nodo act, String nombre){
         FileWriter fichero = null;
         PrintWriter pw = null;
         try {
-            fichero = new FileWriter("src/Graficos/Grafico arboles/" + nombre + ".dot");
+            fichero = new FileWriter("src/Graficos/ARBOLES_201902416/" + nombre + ".dot");
             pw = new PrintWriter(fichero);
             pw.println("digraph G{");
             pw.println("rankdir=UD");
@@ -226,9 +234,9 @@ public static int contid=1;
             //direcci�n doonde se ecnuentra el compilador de graphviz
             String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
             //direcci�n del archivo dot
-            String fileInputPath = "src/Graficos/Grafico arboles/" + nombre + ".dot";
+            String fileInputPath = "src/Graficos/ARBOLES_201902416/" + nombre + ".dot";
             //direcci�n donde se creara la magen
-            String fileOutputPath = "src/Graficos/Grafico arboles/" + nombre + ".jpg";
+            String fileOutputPath = "src/Graficos/ARBOLES_201902416/" + nombre + ".jpg";
             //tipo de convers�n
             String tParam = "-Tjpg";
             String tOParam = "-o";
@@ -478,7 +486,7 @@ public static int contid=1;
 			FileWriter fichero = null;
 	        PrintWriter pw = null;
 	        try {
-	            fichero = new FileWriter("src/Graficos/Grafico siguientes/" +nm+ ".dot");
+	            fichero = new FileWriter("src/Graficos/SIGUIENTES_201902416/" +nm+ ".dot");
 	            pw = new PrintWriter(fichero);
 	            pw.println(cod);
 	        } catch (Exception e) {
@@ -497,9 +505,9 @@ public static int contid=1;
 	            //direcciï¿½n doonde se ecnuentra el compilador de graphviz
 	            String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
 	            //direcciï¿½n del archivo dot
-	            String fileInputPath = "src/Graficos/Grafico siguientes/" +nm+ ".dot";
+	            String fileInputPath = "src/Graficos/SIGUIENTES_201902416/" +nm+ ".dot";
 	            //direcciï¿½n donde se creara la magen
-	            String fileOutputPath = "src/Graficos/Grafico siguientes/" + nm +".jpg";
+	            String fileOutputPath = "src/Graficos/SIGUIENTES_201902416/" + nm +".jpg";
 	            //tipo de conversï¿½n
 	            String tParam = "-Tjpg";
 	            String tOParam = "-o";
@@ -528,8 +536,6 @@ public static int contid=1;
 	
 	
 	public static void generarEstados() {
-		
-		
 		 if(verificar!=contadorEstados) {		
 	     		System.out.println("verificando el estado S"+verificar);
 	     		String cad="S"+verificar;
@@ -641,16 +647,8 @@ public static int contid=1;
  				
  			}
  			
- 			/*
- 			 * for(int j=0;j<valEstado.length;j++) {
- 				String siguiente=sigs.get(valEstado[j]).toString().replace(" ", "");
- 				System.out.println(std[i]+"="+valEstado[j]+"="+hojas.get(valEstado[j])+"="+siguiente+"->"+estadosAlrv.get(siguiente));
- 				
- 			}
- 			 */
  			
  		}
- 		
  		
  		for(int i=0;i<std.length;i++) {
  			if(aceptacion.contains(std[i])) {
@@ -662,11 +660,11 @@ public static int contid=1;
  			
  		}
  		
- 		System.out.println(codigoNodos);
- 		System.out.println(codigoAFD);
+ 		//System.out.println(codigoNodos);
+ 		//System.out.println(codigoAFD);
  		grafAFD(codigoNodos, codigoAFD);
- 		System.out.println(estados);
- 		System.out.println(estadosAlrv);
+ 		//System.out.println(estados);
+ 		//System.out.println(estadosAlrv);
  		
 	 }
 		
@@ -721,7 +719,7 @@ public static int contid=1;
 		FileWriter fichero = null;
         PrintWriter pw = null;
         try {
-            fichero = new FileWriter("src/Graficos/Grafico estados/" +nm+ ".dot");
+            fichero = new FileWriter("src/Graficos/TRANSICIONES_201902416/" +nm+ ".dot");
             pw = new PrintWriter(fichero);
             pw.println(cod);
         } catch (Exception e) {
@@ -740,9 +738,9 @@ public static int contid=1;
             //direcciï¿½n doonde se ecnuentra el compilador de graphviz
             String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
             //direcciï¿½n del archivo dot
-            String fileInputPath = "src/Graficos/Grafico estados/" +nm+ ".dot";
+            String fileInputPath = "src/Graficos/TRANSICIONES_201902416/" +nm+ ".dot";
             //direcciï¿½n donde se creara la magen
-            String fileOutputPath = "src/Graficos/Grafico estados/" + nm +".jpg";
+            String fileOutputPath = "src/Graficos/TRANSICIONES_201902416/" + nm +".jpg";
             //tipo de conversï¿½n
             String tParam = "-Tjpg";
             String tOParam = "-o";
@@ -784,7 +782,7 @@ public static int contid=1;
 		FileWriter fichero = null;
         PrintWriter pw = null;
         try {
-            fichero = new FileWriter("src/Graficos/Grafico AFD/" + nm + ".dot");
+            fichero = new FileWriter("src/Graficos/AFD_201902416/" + nm + ".dot");
             pw = new PrintWriter(fichero);
             pw.println(cadena);
         } catch (Exception e) {
@@ -803,9 +801,9 @@ public static int contid=1;
             //direcci�n doonde se ecnuentra el compilador de graphviz
             String dotPath = "C:/Program Files/Graphviz/bin/dot.exe";
             //direcci�n del archivo dot
-            String fileInputPath = "src/Graficos/Grafico AFD/" + nm + ".dot";
+            String fileInputPath = "src/Graficos/AFD_201902416/" + nm + ".dot";
             //direcci�n donde se creara la magen
-            String fileOutputPath = "src/Graficos/Grafico AFD/" + nm + ".jpg";
+            String fileOutputPath = "src/Graficos/AFD_201902416/" + nm + ".jpg";
             //tipo de convers�n
             String tParam = "-Tjpg";
             String tOParam = "-o";
@@ -916,7 +914,7 @@ public static int contid=1;
 		FileWriter fichero = null;
         PrintWriter pw = null;
         try {
-            fichero = new FileWriter("src/Reportes/" + "Reporte" + ".JSON");
+            fichero = new FileWriter("src/Reportes/SALIDAS_201902416/" + "Reporte" + ".JSON");
             pw = new PrintWriter(fichero);
             pw.println(cadena);
 

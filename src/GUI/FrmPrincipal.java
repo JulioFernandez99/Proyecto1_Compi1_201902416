@@ -10,7 +10,15 @@ import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.metal.*;
 import javax.swing.table.DefaultTableModel;
+
+import com.jtattoo.plaf.acryl.AcrylLookAndFeel;
+import com.jtattoo.plaf.aero.AeroLookAndFeel;
+import com.jtattoo.plaf.bernstein.BernsteinLookAndFeel;
+import com.jtattoo.plaf.fast.FastLookAndFeel;
+import com.jtattoo.plaf.hifi.HiFiLookAndFeel;
+import com.jtattoo.plaf.luna.LunaLookAndFeel;
 
 import analizadores.parser;
 import java_cup.runtime.Symbol;
@@ -36,12 +44,15 @@ import java.awt.event.ActionEvent;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.LookAndFeel;
 import javax.swing.JTable;
 import javax.swing.JMenuBar;
 import java.awt.Color;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 
 public class FrmPrincipal extends JFrame {
 
@@ -61,23 +72,28 @@ public class FrmPrincipal extends JFrame {
 	public static String ruta="";
 	private JMenuItem mntmNewMenuItem_2;
 	public static JTextArea txtreporte;
+	private JMenu mnNewMenu_2;
+	private JMenuItem mntmNewMenuItem_4;
 	
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					
-					
 					FrmPrincipal frame = new FrmPrincipal();
-				
+					
 					frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 					NumeroLinea numeroLinea;
 					numeroLinea=new NumeroLinea(txtcod);
 					scrollPane.setRowHeaderView(numeroLinea);
+					
+					
+					
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -129,7 +145,7 @@ public class FrmPrincipal extends JFrame {
 		FileWriter fichero = null;
         PrintWriter pw = null;
         try {
-            fichero = new FileWriter("src/Reportes/" + "Errores" + ".html");
+            fichero = new FileWriter("src/Reportes/ERRORES_201902416/" + "Errores" + ".html");
             pw = new PrintWriter(fichero);
             pw.println(cod);
         } catch (Exception e) {
@@ -172,19 +188,28 @@ public class FrmPrincipal extends JFrame {
 		}
 	}
 	
-	public FrmPrincipal() {
+	public FrmPrincipal() throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+		setTitle("Proyecto 1");
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		setBounds(100, 100, 1137, 737);
 		
 		menuBar = new JMenuBar();
+		menuBar.setBorderPainted(false);
+		menuBar.setForeground(Color.WHITE);
+		menuBar.setBackground(new Color(0, 0, 0));
 		setJMenuBar(menuBar);
 		
 		mnNewMenu = new JMenu("Archivo");
+		mnNewMenu.setBackground(new Color(0, 139, 139));
+		mnNewMenu.setForeground(Color.WHITE);
 		menuBar.add(mnNewMenu);
 		
+		
 		JMenuItem mntmNewMenuItem = new JMenuItem("Abrir");
+		mntmNewMenuItem.setBackground(new Color(0, 0, 0));
+		mntmNewMenuItem.setForeground(Color.WHITE);
 		mntmNewMenuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("hola desde abrir");
@@ -208,6 +233,8 @@ public class FrmPrincipal extends JFrame {
 		mnNewMenu.add(mntmNewMenuItem);
 		
 		mntmNewMenuItem_1 = new JMenuItem("Guardar");
+		mntmNewMenuItem_1.setForeground(Color.WHITE);
+		mntmNewMenuItem_1.setBackground(new Color(0, 0, 0));
 		mntmNewMenuItem_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if(archOp==true) {
@@ -235,6 +262,8 @@ public class FrmPrincipal extends JFrame {
 		mnNewMenu.add(mntmNewMenuItem_1);
 		
 		mntmNewMenuItem_2 = new JMenuItem("Guardar como");
+		mntmNewMenuItem_2.setForeground(Color.WHITE);
+		mntmNewMenuItem_2.setBackground(new Color(0, 0, 0));
 		mntmNewMenuItem_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser guardar = new JFileChooser();
@@ -242,7 +271,7 @@ public class FrmPrincipal extends JFrame {
 			    guardar.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
 			    File archivo = guardar.getSelectedFile();
-			    System.out.println("Ruta a guardar: "+archivo+".olc");
+			    //System.out.println("Ruta a guardar: "+archivo+".olc");
 			   
 			    FileWriter fichero = null;
 		        PrintWriter pw = null;
@@ -266,7 +295,125 @@ public class FrmPrincipal extends JFrame {
 			}
 		});
 		mnNewMenu.add(mntmNewMenuItem_2);
+		
+		JMenuItem mntmNewMenuItem_3 = new JMenuItem("Salir");
+		mntmNewMenuItem_3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+		mntmNewMenuItem_3.setForeground(Color.WHITE);
+		mntmNewMenuItem_3.setBackground(new Color(0, 0, 0));
+		mnNewMenu.add(mntmNewMenuItem_3);
+		
+		JMenu mnNewMenu_1 = new JMenu("Manuales");
+		mnNewMenu_1.setBackground(new Color(0, 0, 0));
+		mnNewMenu_1.setForeground(Color.WHITE);
+		menuBar.add(mnNewMenu_1);
+		
+		JMenuItem mntmNewMenuItem_6 = new JMenuItem("Usuario");
+		mntmNewMenuItem_6.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String url=System.getProperty("user.dir")+"\\src\\Manuales\\ManualDeUsuario.pdf";
+				System.out.println(url);
+				try {
+					ProcessBuilder p=new ProcessBuilder();
+					p.command("cmd","/c",url);
+					p.start();
+				} catch (Exception e1) {
+				         e1.fillInStackTrace();
+				}
+			}
+		});
+		mntmNewMenuItem_6.setForeground(Color.WHITE);
+		mntmNewMenuItem_6.setBackground(new Color(0, 0, 0));
+		mnNewMenu_1.add(mntmNewMenuItem_6);
+		
+		JMenuItem mntmNewMenuItem_5 = new JMenuItem("Tecnico");
+		mntmNewMenuItem_5.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String url=System.getProperty("user.dir")+"\\src\\Manuales\\ManualTecnico.pdf";
+				System.out.println(url);
+				try {
+					ProcessBuilder p=new ProcessBuilder();
+					p.command("cmd","/c",url);
+					p.start();
+				} catch (Exception e1) {
+				         e1.fillInStackTrace();
+				}
+			}
+		});
+		mntmNewMenuItem_5.setForeground(Color.WHITE);
+		mntmNewMenuItem_5.setBackground(new Color(0, 0, 0));
+		mnNewMenu_1.add(mntmNewMenuItem_5);
+		
+		mnNewMenu_2 = new JMenu("Gramatica");
+		mnNewMenu_2.setForeground(Color.WHITE);
+		mnNewMenu_2.setBackground(new Color(0, 139, 139));
+		menuBar.add(mnNewMenu_2);
+		
+		mntmNewMenuItem_4 = new JMenuItem("Gramatica");
+		mntmNewMenuItem_4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String url=System.getProperty("user.dir")+"\\src\\Manuales\\Gramatica.pdf";
+				//System.out.println(url);
+				try {
+					ProcessBuilder p=new ProcessBuilder();
+					p.command("cmd","/c",url);
+					p.start();
+				} catch (Exception e1) {
+				         e1.fillInStackTrace();
+				}
+			}
+		});
+		mntmNewMenuItem_4.setForeground(Color.WHITE);
+		mntmNewMenuItem_4.setBackground(new Color(0, 0, 0));
+		mnNewMenu_2.add(mntmNewMenuItem_4);
+		
+		JMenu mnNewMenu_3 = new JMenu("Reportes");
+		mnNewMenu_3.setForeground(Color.WHITE);
+		menuBar.add(mnNewMenu_3);
+		
+		JMenuItem mntmNewMenuItem_7 = new JMenuItem("Errores");
+		mntmNewMenuItem_7.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String url=System.getProperty("user.dir")+"\\src\\Reportes\\Errores_201902416\\Errores.html";
+				//System.out.println(url);
+				try {
+					ProcessBuilder p=new ProcessBuilder();
+					p.command("cmd","/c",url);
+					p.start();
+				} catch (Exception e1) {
+				         e1.fillInStackTrace();
+				}
+			}
+		});
+		mntmNewMenuItem_7.setBackground(Color.BLACK);
+		mntmNewMenuItem_7.setForeground(Color.WHITE);
+		mnNewMenu_3.add(mntmNewMenuItem_7);
+		
+		JMenuItem mntmNewMenuItem_8 = new JMenuItem("Salidas");
+		mntmNewMenuItem_8.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String url=System.getProperty("user.dir")+"\\src\\Reportes\\SALIDAS_201902416\\Reporte.JSON";
+				//System.out.println(url);
+				try {
+					ProcessBuilder p=new ProcessBuilder();
+					p.command("cmd","/c",url);
+					p.start();
+				} catch (Exception e1) {
+				         e1.fillInStackTrace();
+				}
+			}
+		});
+		mntmNewMenuItem_8.setForeground(Color.WHITE);
+		mntmNewMenuItem_8.setBackground(Color.BLACK);
+		mnNewMenu_3.add(mntmNewMenuItem_8);
+		
+		JMenuBar menuBar_1 = new JMenuBar();
+		menuBar.add(menuBar_1);
 		contentPane = new JPanel();
+		contentPane.setBackground(new Color(70, 130, 180));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
@@ -284,11 +431,16 @@ public class FrmPrincipal extends JFrame {
 		
 		
 		JButton btnAnalisisLex = new JButton("Analizar");
+		btnAnalisisLex.setForeground(Color.WHITE);
+		btnAnalisisLex.setBackground(Color.BLACK);
 		btnAnalisisLex.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				vaciarTable();
+				errs="";
+				if(!txtcod.getText().equals("")) {
+					
 				
-				txtreporte.setText(ruta+"olc");
+				//txtreporte.setText(ruta+"olc");
 				analizadores.parser parse;
 	        	parse = new analizadores.parser( new analizadores.Lexico(new StringReader(txtcod.getText().toString())));
 	            try {
@@ -298,11 +450,16 @@ public class FrmPrincipal extends JFrame {
 					// TODO Auto-generated catch block
 					
 				}
-				
+			}
+				else {
+					vaciarTable();
+					JOptionPane.showMessageDialog(null, "No hay codigo para analizar",
+							  "Error", JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		});
-		btnAnalisisLex.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		btnAnalisisLex.setBounds(577, 139, 121, 37);
+		btnAnalisisLex.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnAnalisisLex.setBounds(615, 184, 121, 37);
 		contentPane.add(btnAnalisisLex);
 		
 		s1=new JScrollPane();
@@ -313,7 +470,7 @@ public class FrmPrincipal extends JFrame {
 		
 		table = new JTable(mt);
 		table.setBounds(606, 376, 320, 228);
-		s1.setBounds(51, 528, 1169, 145);
+		s1.setBounds(51, 522, 1169, 145);
 		s1.setViewportView(table);
 		contentPane.add(s1);
 		
@@ -323,6 +480,25 @@ public class FrmPrincipal extends JFrame {
 		
 		txtreporte = new JTextArea();
 		scrollPane_1.setViewportView(txtreporte);
+		
+		JLabel lblNewLabel = new JLabel("EXREGAN");
+		lblNewLabel.setFont(new Font("Cooper Black", Font.PLAIN, 32));
+		lblNewLabel.setBounds(581, 11, 234, 56);
+		contentPane.add(lblNewLabel);
+		
+		JButton btnLimpiiar = new JButton("Limpiar");
+		btnLimpiiar.setForeground(Color.WHITE);
+		btnLimpiiar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				vaciarTable();
+				txtcod.setText("");
+				txtreporte.setText("");
+			}
+		});
+		btnLimpiiar.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		btnLimpiiar.setBackground(Color.BLACK);
+		btnLimpiiar.setBounds(615, 267, 121, 37);
+		contentPane.add(btnLimpiiar);
 		
 		
 		
